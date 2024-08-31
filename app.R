@@ -7,15 +7,64 @@ library(dplyr)
 
 # Define the UI
 ui <- dashboardPage(
-  dashboardHeader(title = "Trait Distribution Simulator"),
+  dashboardHeader(title = dashboardBrand(
+    title = "Trait Dist. Simulator",
+    image = "images/logo.jpg",
+    opacity = 0.8
+  )),
   dashboardSidebar(
+    expandOnHover = TRUE,
     sidebarMenu(
+      menuItem("Home", tabName = "home", icon = icon("home")),
       menuItem("Individual Simulation", tabName = "individual", icon = icon("chart-line")),
       menuItem("Combined Simulation", tabName = "combined", icon = icon("chart-bar"))
     )
   ),
   dashboardBody(
     tabItems(
+      tabItem(
+        tabName = "home",
+        fluidRow(
+          box(
+            title = "Welcome to the Trait Distribution Simulator",
+            width = 12,
+            solidHeader = TRUE,
+            status = "primary",
+            collapsible = FALSE,
+            p("Explore the genetic basis of traits with our interactive simulator!"),
+            p("Use the tabs to navigate between different types of simulations.")
+          )
+        ),
+        fluidRow(
+          box(
+            title = "Individual Simulation",
+            width = 4,
+            solidHeader = TRUE,
+            status = "info",
+            collapsible = FALSE,
+            icon = icon("chart-line"),
+            p("Run simulations on individual genetic architectures to see how different factors influence trait distributions.")
+          ),
+          box(
+            title = "Combined Simulation",
+            width = 4,
+            solidHeader = TRUE,
+            status = "success",
+            icon = icon("chart-bar"),
+            collapsible = FALSE,
+            p("Compare trait distributions under different genetic architectures in one combined view.")
+          ),
+          box(
+            title = "Customizable Parameters",
+            width = 4,
+            solidHeader = TRUE,
+            status = "warning",
+            icon = icon("sliders-h"),
+            collapsible = FALSE,
+            p("Adjust the number of loci, individuals, and other parameters to tailor the simulation to your needs.")
+          )
+        )
+      ),
       tabItem(
         tabName = "individual",
         fluidRow(
@@ -25,32 +74,30 @@ ui <- dashboardPage(
             solidHeader = TRUE,
             status = "primary",
             
-            popover(numericInput("num_loci", "Number of Loci", value = 1000, min = 10, max = 10000),
-                    title = "Number of Loci",
-                    content = "The number of genetic loci (locations) considered 
+            bs4Dash::popover(numericInput("num_loci", "Number of Loci", value = 1000, min = 10, max = 10000),
+                             title = "Number of Loci",
+                             content = "The number of genetic loci (locations) considered 
                     in the simulation. More loci can lead to more complex trait 
                     distributions.",
-                    placement = "right"),
+                             placement = "right"),
             
-            
-            popover(numericInput("num_individuals", "Number of Individuals", value = 1000, min = 100, max = 10000),
-                    title = "Hi",
-                    content = "The sample size for the simulation. Larger numbers provide 
+            bs4Dash::popover(numericInput("num_individuals", "Number of Individuals", value = 1000, min = 100, max = 10000),
+                             title = "Number of Individuals",
+                             content = "The sample size for the simulation. Larger numbers provide 
                     more accurate distributions but may increase computation time.", 
-                    placement = "right"),
-          
+                             placement = "right"),
+            
             popover(selectInput("effect_size_dist", "Effect Size Distribution",
-                                  choices = c("Fisher" = "fisher", "Kimura" = "Kimura")),
-                    title = "Hello",
+                                choices = c("Fisher" = "fisher", "Kimura" = "Kimura")),
+                    title = "Effect Size Distribution",
                     content = "The model used to generate effect sizes for each locus. 
                     Fisher's model assumes many small effects, while Kimura's model 
                     allows for larger effect sizes.", 
                     placement = "right"),
             
-            
             popover(selectInput("architecture", "Genetic Architecture",
                                 choices = c("Additive", "Dominant", "Epistatic")), 
-                    title = "",
+                    title = "Genetic Architecture",
                     content = "The way genes interact to produce the trait. 
                     Additive: effects sum linearly. Dominant: presence of an allele 
                     determines the effect. Epistatic: genes interact non-linearly.", 
@@ -75,9 +122,7 @@ ui <- dashboardPage(
             status = "success",
             plotOutput("effect_size_plot")
           )
-        ),
-        bsPopover("trait_plot", "Trait Distribution", "This plot shows the distribution of trait values based on the selected parameters. The shape of this distribution can reveal important information about the genetic architecture.", placement = "top", trigger = "hover"),
-        bsPopover("effect_size_plot", "Effect Size Distribution", "This plot displays the distribution of effect sizes for each locus, based on the selected effect size distribution model.", placement = "top", trigger = "hover")
+        )
       ),
       tabItem(
         tabName = "combined",
@@ -87,13 +132,29 @@ ui <- dashboardPage(
             width = 4,
             solidHeader = TRUE,
             status = "primary",
-            numericInput("combined_num_loci", "Number of Loci", value = 1000, min = 10, max = 10000),
-            bsPopover("combined_num_loci", "Number of Loci", "The number of genetic loci used in all three simulations. This allows for direct comparison between different genetic architectures.", placement = "right", trigger = "hover"),
-            numericInput("combined_num_individuals", "Number of Individuals", value = 1000, min = 100, max = 10000),
-            bsPopover("combined_num_individuals", "Number of Individuals", "The sample size used for all three simulations. Consistent sample size ensures fair comparison between architectures.", placement = "right", trigger = "hover"),
-            selectInput("combined_effect_size_dist", "Effect Size Distribution",
-                        choices = c("Fisher" = "fisher", "Kimura" = "Kimura")),
-            bsPopover("combined_effect_size_dist", "Effect Size Distribution", "The model used to generate effect sizes. This will be applied consistently across all three genetic architectures.", placement = "right", trigger = "hover"),
+            
+            popover(
+              numericInput("combined_num_loci", "Number of Loci", value = 1000, min = 10, max = 10000),
+              title = "Number of Loci",
+              content = "The number of genetic loci used in all three simulations. This allows for direct comparison between different genetic architectures.",
+              placement = "right"
+            ),
+            
+            popover(
+              numericInput("combined_num_individuals", "Number of Individuals", value = 1000, min = 100, max = 10000),
+              title = "Number of Individuals",
+              content = "The sample size used for all three simulations. Consistent sample size ensures fair comparison between architectures.",
+              placement = "right"
+            ),
+            
+            popover(
+              selectInput("combined_effect_size_dist", "Effect Size Distribution",
+                          choices = c("Fisher" = "fisher", "Kimura" = "Kimura")),
+              title = "Effect Size Distribution",
+              content = "The model used to generate effect sizes. This will be applied consistently across all three genetic architectures.",
+              placement = "right"
+            ),
+            
             actionButton("run_combined_simulation", "Run Combined Simulation", class = "btn-primary")
           ),
           box(
@@ -103,8 +164,7 @@ ui <- dashboardPage(
             status = "info",
             plotOutput("combined_trait_plot", height = "600px")
           )
-        ),
-        bsPopover("combined_trait_plot", "Combined Trait Distributions", "This plot compares trait distributions across three different genetic architectures (Additive, Dominant, Epistatic) using the same input parameters. It allows for direct comparison of how genetic architecture influences trait distribution.", placement = "top", trigger = "hover")
+        )
       )
     )
   )
